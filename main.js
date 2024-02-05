@@ -1,5 +1,9 @@
 let numSquares = 16;
 let drawingWindowSize = 960;
+let opacityInc = 0.1;
+let random = false;
+let defaultColor = 'black';
+let color = defaultColor;
 
 function buildDrawingWindow (drawingWindowSize, numSquares) {
     const pastContainer = document.querySelector('.drawingWindow');
@@ -7,6 +11,7 @@ function buildDrawingWindow (drawingWindowSize, numSquares) {
     if (pastContainer !== null) {pastContainer.remove()};
     
     if (numSquares > 100) {numSquares = 100};
+    if (drawingWindowSize > 960) {drawingWindowSize = 960};
     let squareSize = drawingWindowSize/numSquares;
 
     let container = document.createElement('div');
@@ -38,6 +43,7 @@ function buildDrawingWindow (drawingWindowSize, numSquares) {
             div = squares[i][j];
         
             div.style.cssText =`
+                color = white;
                 height: ${squareSize}px;
                 width: ${squareSize}px;
                 flex: 0 0 auto;
@@ -49,8 +55,26 @@ function buildDrawingWindow (drawingWindowSize, numSquares) {
     container = document.body.appendChild(container);
 }
 
+function getColor () {
+    if (random === true) {
+        let randomColor = `hsl(${Math.round(Math.random()*360)}deg 50% 50%)`;
+        return randomColor;
+    } else {
+        return color;
+    }
+}
+
+function getOpacity (div) {
+    opacity = div.style.opacity;
+    if (opacity == '') {opacity = '0'};
+    return (Number(opacity)+opacityInc).toString();
+}
+
 function mouseOver (div) {
-    div.style.backgroundColor = 'black';
+    let divColor = getColor();
+    let newOpacity = getOpacity(div);
+    div.style.opacity = newOpacity;
+    div.style.backgroundColor = divColor;
 }
 
 function changeNumSquares () {
@@ -58,10 +82,51 @@ function changeNumSquares () {
     buildDrawingWindow(drawingWindowSize, numSquares);
 }
 
+function changeWindowSize () {
+    drawingWindowSize = prompt('How many pixels ? (max:960px)', '960')
+    buildDrawingWindow(drawingWindowSize, numSquares);
+}
+
+function changeRandom (randomButton) {
+    random = !random;
+    randomButton.innerText = `Random: ${random}`;
+    return random;
+}
+
+function changeColor () {
+    let newColor = prompt('Enter new color (must be valid css color, default is black)', 'black');
+    if (!CSS.supports('color', newColor)) {newColor = defaultColor};
+    color = newColor;
+    colorButton.innerText = `Change color: ${color}`;
+    return newColor;
+}
+
+
+// Building of the default drawing window
+
 buildDrawingWindow(drawingWindowSize, numSquares);
 
-const sizeButton = document.querySelector('#size');
+// Sets up the button for changing number of squares
 
-sizeButton.addEventListener('click', function () {changeNumSquares()});
+const numSquaresButton = document.querySelector('#numSquares');
 
+numSquaresButton.addEventListener('click', function () {changeNumSquares()});
+
+// Sets up button for changing size of drawing window
+
+const windowSizeButton = document.querySelector('#windowSize');
+
+windowSizeButton.addEventListener('click', function () {changeWindowSize()});
+
+// Sets up random color button
+
+const randomButton = document.querySelector('#random');
+
+randomButton.addEventListener('click', function () {changeRandom(randomButton)});
+
+// Sets up color button
+
+const colorButton = document.querySelector('#color');
+
+colorButton.addEventListener('click', function () {changeColor(colorButton)});
 
