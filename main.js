@@ -1,32 +1,33 @@
 const defaultNumSquares = 16;
 const defaultWindowSize = 960;
-const defaultOpacityInc = 0.1;
-const defaultDrawingColor = 'black'
 const defaultWindowColor = 'white';
-const maxNumSquares = 16;
+const defaultDrawingColor = 'black'
+const defaultOpacityInc = 0.1;
+const maxNumSquares = 100;
 const maxWindowSize = 960;
 
 let numSquares = defaultNumSquares;
 let windowSize = defaultWindowSize;
-let opacityInc = defaultOpacityInc;
+let windowColor = defaultWindowColor;
 let random = false;
 let drawingColor = defaultDrawingColor;
-let windowColor = defaultWindowColor;
+let opacityInc = defaultOpacityInc;
+let eraser = false;
 
 function buildDrawingWindow (windowSize, numSquares) {
-    const pastContainer = document.querySelector('.drawingWindow');
+    const pastWindow = document.querySelector('.drawingWindow');
 
-    if (pastContainer !== null) {pastContainer.remove()};
+    if (pastWindow !== null) {pastWindow.remove()};
     
     if (numSquares > maxNumSquares || numSquares < 0) {numSquares = maxNumSquares};
     if (windowSize > maxWindowSize || windowSize < 0) {windowSize = maxWindowSize};
     let squareSize = windowSize/numSquares;
 
-    let container = document.createElement('div');
-    container.classList.add('drawingWindow');
+    let drawingWindow = document.createElement('div');
+    drawingWindow.classList.add('drawingWindow');
 
-    container.style.cssText=`
-        background-color: white;
+    drawingWindow.style.cssText=`
+        background-color: ${windowColor};
         height: ${windowSize}px;width: ${windowSize}px;
         margin: 0;
         position: absolute;
@@ -48,20 +49,20 @@ function buildDrawingWindow (windowSize, numSquares) {
             div = document.createElement('div');
             let events = 'mouseover click'.split(' ');
             events.forEach( event => div.addEventListener(event, function (event) {draw(div, event)}) );
-            squares[i][j] = container.appendChild(div);
+            squares[i][j] = drawingWindow.appendChild(div);
             div = squares[i][j];
         
             div.style.cssText =`
                 height: ${squareSize}px;
                 width: ${squareSize}px;
+                opacity: 0;
                 flex: 0 0 auto;
             `
-            div.style.backgroundColor = windowColor;
         }
         
     }
 
-    container = document.body.appendChild(container);
+    drawingWindow = document.body.appendChild(drawingWindow);
 }
 
 function getColor () {
@@ -80,39 +81,38 @@ function getOpacity (opacity) {
 }
 
 function draw (div, e) {
-    if (e.type == 'mouseover' && e.buttons == 1) {
+    if (e.type == 'mouseover' && e.buttons == 1 || e.type == 'click') {
         let divColor = getColor();
-        let newOpacity = getOpacity(div.style.opacity);
-        div.style.opacity = newOpacity;
-        div.style.backgroundColor = divColor;
-    } else if (e.type == 'click') {
-        let divColor = getColor();
-        let newOpacity = getOpacity(div.style.opacity);
+        let newOpacity = (eraser) ? 0 : getOpacity(div.style.opacity);
         div.style.opacity = newOpacity;
         div.style.backgroundColor = divColor;
     }
 }
 
-function changeNumSquares () {
-    numSquares = prompt('How many squares ? (max:100)', '16')
+function changeNumSquares (button) {
+    numSquares = parseInt(prompt('How many squares ? (max:100)', '16'));
+    if (isNaN(numSquares)) {numSquares = defaultNumSquares};
+    button.innerText = `Change the number of squares for the drawing area: ${numSquares}`;
     buildDrawingWindow(windowSize, numSquares);
 }
 
-function changeWindowSize () {
-    drawingWindowSize = prompt('How many pixels ? (max:960px)', '960')
+function changeWindowSize (button) {
+    windowSize = parseInt(prompt('How many pixels ? (max:960px)', '960'));
+    if (isNaN(windowSize)) {windowSize = defaultWindowSize};
+    button.innerText = `Change the size of the drawing area: ${windowSize}px`;
     buildDrawingWindow(windowSize, numSquares);
 }
 
-function changeWindowColor () {
+function changeWindowColor (button) {
     let newColor = prompt('Enter new color (must be valid css color, default is '+defaultWindowColor+')', defaultWindowColor);
     if (!CSS.supports('color', newColor)) {newColor = defaultWindowColor};
     windowColor = newColor;
     buildDrawingWindow(windowSize, numSquares);
-    colorButton.innerText = `Change color: ${newColor}`;
+    button.innerText = `Change windows background color: ${newColor}`;
     return newColor;
 }
 
-function changeRandom (button) {
+function toggleRandom (button) {
     random = !random;
     button.innerText = `Random: ${random}`;
     return random;
@@ -134,6 +134,12 @@ function changeOpacity (button) {
     return newOpacityInc;
 }
 
+function toggleEraser (button) {
+    eraser = !eraser;
+    button.innerText = `Eraser: ${eraser}`;
+    return eraser;
+}
+
 
 // Building of the default drawing window
 
@@ -143,25 +149,25 @@ buildDrawingWindow(windowSize, numSquares);
 
 const numSquaresButton = document.querySelector('#numSquares');
 
-numSquaresButton.addEventListener('click', function () {changeNumSquares()});
+numSquaresButton.addEventListener('click', function () {changeNumSquares(numSquaresButton)});
 
 // Sets up button for changing size of drawing window
 
 const windowSizeButton = document.querySelector('#windowSize');
 
-windowSizeButton.addEventListener('click', function () {changeWindowSize()});
+windowSizeButton.addEventListener('click', function () {changeWindowSize(windowSizeButton)});
 
 // Sets up the button for background color of drawing window
 
 const windowColorButton = document.querySelector('#windowColor');
 
-windowColorButton.addEventListener('click', function () {changeWindowColor()});
+windowColorButton.addEventListener('click', function () {changeWindowColor(windowColorButton)});
 
 // Sets up random color button
 
 const randomButton = document.querySelector('#random');
 
-randomButton.addEventListener('click', function () {changeRandom(randomButton)});
+randomButton.addEventListener('click', function () {toggleRandom(randomButton)});
 
 // Sets up color button
 
@@ -169,9 +175,15 @@ const colorButton = document.querySelector('#color');
 
 colorButton.addEventListener('click', function () {changeColor(colorButton)});
 
-// Sets up color button
+// Sets up opacity button
 
 const opacityButton = document.querySelector('#opacity');
 
 opacityButton.addEventListener('click', function () {changeOpacity(opacityButton)});
+
+// Sets up eraser utton
+
+const eraserButton = document.querySelector('#eraser');
+
+eraserButton.addEventListener('click', function () {toggleEraser(eraserButton)});
 
