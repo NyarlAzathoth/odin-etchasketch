@@ -1,25 +1,33 @@
-let numSquares = 16;
-let drawingWindowSize = 960;
-let opacityInc = 0.1;
-let random = false;
-let defaultColor = 'black';
-let color = defaultColor;
+const defaultNumSquares = 16;
+const defaultWindowSize = 960;
+const defaultOpacityInc = 0.1;
+const defaultDrawingColor = 'black'
+const defaultWindowColor = 'white';
+const maxNumSquares = 16;
+const maxWindowSize = 960;
 
-function buildDrawingWindow (drawingWindowSize, numSquares) {
+let numSquares = defaultNumSquares;
+let windowSize = defaultWindowSize;
+let opacityInc = defaultOpacityInc;
+let random = false;
+let drawingColor = defaultDrawingColor;
+let windowColor = defaultWindowColor;
+
+function buildDrawingWindow (windowSize, numSquares) {
     const pastContainer = document.querySelector('.drawingWindow');
 
     if (pastContainer !== null) {pastContainer.remove()};
     
-    if (numSquares > 100) {numSquares = 100};
-    if (drawingWindowSize > 960) {drawingWindowSize = 960};
-    let squareSize = drawingWindowSize/numSquares;
+    if (numSquares > maxNumSquares || numSquares < 0) {numSquares = maxNumSquares};
+    if (windowSize > maxWindowSize || windowSize < 0) {windowSize = maxWindowSize};
+    let squareSize = windowSize/numSquares;
 
     let container = document.createElement('div');
     container.classList.add('drawingWindow');
 
     container.style.cssText=`
         background-color: white;
-        height: ${drawingWindowSize}px;width: ${drawingWindowSize}px;
+        height: ${windowSize}px;width: ${windowSize}px;
         margin: 0;
         position: absolute;
         top: 50%;
@@ -38,16 +46,17 @@ function buildDrawingWindow (drawingWindowSize, numSquares) {
             let div = squares[i][j];
             
             div = document.createElement('div');
-            div.addEventListener('mouseover', function () {mouseOver(div)});
+            let events = 'mouseover click'.split(' ');
+            events.forEach( event => div.addEventListener(event, function (event) {draw(div, event)}) );
             squares[i][j] = container.appendChild(div);
             div = squares[i][j];
         
             div.style.cssText =`
-                color = white;
                 height: ${squareSize}px;
                 width: ${squareSize}px;
                 flex: 0 0 auto;
             `
+            div.style.backgroundColor = windowColor;
         }
         
     }
@@ -60,51 +69,75 @@ function getColor () {
         let randomColor = `hsl(${Math.round(Math.random()*360)}deg 50% 50%)`;
         return randomColor;
     } else {
-        return color;
+        return drawingColor;
     }
 }
 
-function getOpacity (div) {
-    opacity = div.style.opacity;
+function getOpacity (opacity) {
     if (opacity == '') {opacity = '0'};
+    if (opacity == '1.0') {return opacity};
     return (Number(opacity)+opacityInc).toString();
 }
 
-function mouseOver (div) {
-    let divColor = getColor();
-    let newOpacity = getOpacity(div);
-    div.style.opacity = newOpacity;
-    div.style.backgroundColor = divColor;
+function draw (div, e) {
+    if (e.type == 'mouseover' && e.buttons == 1) {
+        let divColor = getColor();
+        let newOpacity = getOpacity(div.style.opacity);
+        div.style.opacity = newOpacity;
+        div.style.backgroundColor = divColor;
+    } else if (e.type == 'click') {
+        let divColor = getColor();
+        let newOpacity = getOpacity(div.style.opacity);
+        div.style.opacity = newOpacity;
+        div.style.backgroundColor = divColor;
+    }
 }
 
 function changeNumSquares () {
     numSquares = prompt('How many squares ? (max:100)', '16')
-    buildDrawingWindow(drawingWindowSize, numSquares);
+    buildDrawingWindow(windowSize, numSquares);
 }
 
 function changeWindowSize () {
     drawingWindowSize = prompt('How many pixels ? (max:960px)', '960')
-    buildDrawingWindow(drawingWindowSize, numSquares);
+    buildDrawingWindow(windowSize, numSquares);
 }
 
-function changeRandom (randomButton) {
+function changeWindowColor () {
+    let newColor = prompt('Enter new color (must be valid css color, default is '+defaultWindowColor+')', defaultWindowColor);
+    if (!CSS.supports('color', newColor)) {newColor = defaultWindowColor};
+    windowColor = newColor;
+    buildDrawingWindow(windowSize, numSquares);
+    colorButton.innerText = `Change color: ${newColor}`;
+    return newColor;
+}
+
+function changeRandom (button) {
     random = !random;
-    randomButton.innerText = `Random: ${random}`;
+    button.innerText = `Random: ${random}`;
     return random;
 }
 
-function changeColor () {
-    let newColor = prompt('Enter new color (must be valid css color, default is black)', 'black');
-    if (!CSS.supports('color', newColor)) {newColor = defaultColor};
-    color = newColor;
-    colorButton.innerText = `Change color: ${color}`;
+function changeColor (button) {
+    let newColor = prompt('Enter new color (must be valid css color, default is '+defaultDrawingColor+')', defaultDrawingColor);
+    if (!CSS.supports('color', newColor)) {newColor = defaultDrawingColor};
+    drawingColor = newColor;
+    button.innerText = `Change drawing color: ${newColor}`;
     return newColor;
+}
+
+function changeOpacity (button) {
+    let newOpacityInc = prompt('Enter new opacity rate (must be number between 0 and 1, default is '+defaultOpacityInc+')', defaultOpacityInc);
+    if (!CSS.supports('opacity', newOpacityInc)) {newOpacityInc = defaultOpacityInc};
+    opacityInc = Number(newOpacityInc);
+    button.innerText = `Change drawing color: ${newOpacityInc}`;
+    return newOpacityInc;
 }
 
 
 // Building of the default drawing window
 
-buildDrawingWindow(drawingWindowSize, numSquares);
+buildDrawingWindow(windowSize, numSquares);
 
 // Sets up the button for changing number of squares
 
@@ -118,6 +151,12 @@ const windowSizeButton = document.querySelector('#windowSize');
 
 windowSizeButton.addEventListener('click', function () {changeWindowSize()});
 
+// Sets up the button for background color of drawing window
+
+const windowColorButton = document.querySelector('#windowColor');
+
+windowColorButton.addEventListener('click', function () {changeWindowColor()});
+
 // Sets up random color button
 
 const randomButton = document.querySelector('#random');
@@ -129,4 +168,10 @@ randomButton.addEventListener('click', function () {changeRandom(randomButton)})
 const colorButton = document.querySelector('#color');
 
 colorButton.addEventListener('click', function () {changeColor(colorButton)});
+
+// Sets up color button
+
+const opacityButton = document.querySelector('#opacity');
+
+opacityButton.addEventListener('click', function () {changeOpacity(opacityButton)});
 
