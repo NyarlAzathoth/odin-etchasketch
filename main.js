@@ -1,34 +1,47 @@
-const defaultNumSquares = 16;
-const defaultWindowSize = 960;
-const defaultWindowColor = 'white';
-const defaultRandom = false;
-const defaultDrawingColor = 'black';
-const defaultOpacityInc = 0.1;
-const defaultEraser = false;
+const NUM_SQUARES_DEFAULT = 16;
+const WINDOW_SIZE_DEFAULT = 960;
+const WINDOW_COLOR_DEFAULT = 'white';
+const RANDOM_DEFAULT = false;
+const DRAWING_COLOR_DEFAULT = 'black';
+const OPACITY_INC_DEFAULT = 0.5;
+const ERASER_DEFAULT = false;
 
-const maxNumSquares = 100;
-const maxWindowSize = 960;
+const SETTINGS_DEFAULT = [
+    NUM_SQUARES_DEFAULT, 
+    WINDOW_SIZE_DEFAULT, 
+    WINDOW_COLOR_DEFAULT, 
+    RANDOM_DEFAULT, 
+    DRAWING_COLOR_DEFAULT, 
+    OPACITY_INC_DEFAULT, 
+    ERASER_DEFAULT
+    ];
 
-let numSquares = defaultNumSquares;
-let windowSize = defaultWindowSize;
-let windowColor = defaultWindowColor;
-let random = defaultRandom;
-let drawingColor = defaultDrawingColor;
-let opacityInc = defaultOpacityInc;
-let eraser = defaultEraser;
+const NUM_SQUARES_MAX = 100;
+const WINDOW_SIZE_MAX = 960;
+
+let numSquares = NUM_SQUARES_DEFAULT;
+let windowSize = WINDOW_SIZE_DEFAULT;
+let windowColor = WINDOW_COLOR_DEFAULT;
+let random = RANDOM_DEFAULT;
+let drawingColor = DRAWING_COLOR_DEFAULT;
+let opacityInc = OPACITY_INC_DEFAULT;
+let eraser = ERASER_DEFAULT;
+
 
 function buildDrawingWindow (windowSize, numSquares) {
     const pastWindow = document.querySelector('.drawingWindow');
 
     if (pastWindow !== null) {pastWindow.remove()};
     
-    if (numSquares === undefined || numSquares > maxNumSquares || numSquares < 0) {numSquares = maxNumSquares};
-    if (windowSize === undefined || windowSize > maxWindowSize || windowSize < 0) {windowSize = maxWindowSize};
+    if (numSquares === undefined || numSquares > NUM_SQUARES_MAX || numSquares < 0) {numSquares = NUM_SQUARES_MAX};
+    if (windowSize === undefined || windowSize > WINDOW_SIZE_MAX || windowSize < 0) {windowSize = WINDOW_SIZE_MAX};
     let squareSize = windowSize/numSquares;
 
     let drawingWindow = document.createElement('div');
     drawingWindow.classList.add('drawingWindow');
 
+
+    // centers window, changes color, add border and sets up flex display ofr the squares
     drawingWindow.style.cssText=`
         background-color: ${windowColor};
         height: ${windowSize}px;width: ${windowSize}px;
@@ -42,6 +55,8 @@ function buildDrawingWindow (windowSize, numSquares) {
         display: flex;
         flex-wrap: wrap;
     `
+
+    // creates squares in nested lists and add an event listener to each
 
     let squares = new Array(numSquares);
 
@@ -78,12 +93,14 @@ function getColor () {
     }
 }
 
+// returns new opacity based on current opacity
 function getNewOpacity (opacity) {
     if (opacity == '') {opacity = '0'};
     if (opacity == '1.0') {return opacity};
     return (Number(opacity)+opacityInc).toString();
 }
 
+// draws if the mouse hovers over square while mouse click is down or when clicking
 function draw (div, e) {
     if (e.type == 'mouseover' && e.buttons == 1 || e.type == 'click') {
         let divColor = getColor();
@@ -95,7 +112,7 @@ function draw (div, e) {
 
 function changeNumSquares () {
     newNumSquares = parseInt(prompt('How many squares ? (max:100)', '16'));
-    if (isNaN(newNumSquares)) {newNumSquares = defaultNumSquares};
+    if (isNaN(newNumSquares)) {newNumSquares = NUM_SQUARES_DEFAULT};
     numSquares = newNumSquares;
     numSquaresButton.innerText = `Change the number of squares for the drawing area: ${numSquares}`;
     buildDrawingWindow(windowSize, numSquares);
@@ -103,15 +120,15 @@ function changeNumSquares () {
 
 function changeWindowSize () {
     newWindowSize = parseInt(prompt('How many pixels ? (max:960px)', '960'));
-    if (isNaN(newWindowSize)) {newWindowSize = defaultWindowSize};
+    if (isNaN(newWindowSize)) {newWindowSize = WINDOW_SIZE_DEFAULT};
     windowSize = newWindowSize;
     windowSizeButton.innerText = `Change the size of the drawing area: ${windowSize}px`;
     buildDrawingWindow(windowSize, numSquares);
 }
 
 function changeWindowColor () {
-    let newColor = prompt('Enter new color (must be valid css color, default is '+defaultWindowColor+')', defaultWindowColor);
-    if (!CSS.supports('color', newColor)) {newColor = defaultWindowColor};
+    let newColor = prompt('Enter new color (must be valid css color, default is '+WINDOW_COLOR_DEFAULT+')', WINDOW_COLOR_DEFAULT);
+    if (!CSS.supports('color', newColor)) {newColor = WINDOW_COLOR_DEFAULT};
     windowColor = newColor;
     buildDrawingWindow(newWindowSize, newNumSquares);
     windowColorButton.innerText = `Change windows background color: ${newColor}`;
@@ -125,16 +142,16 @@ function toggleRandom () {
 }
 
 function changeColor () {
-    let newColor = prompt('Enter new color (must be valid css color, default is '+defaultDrawingColor+')', defaultDrawingColor);
-    if (!CSS.supports('color', newColor)) {newColor = defaultDrawingColor};
+    let newColor = prompt('Enter new color (must be valid css color, default is '+DRAWING_COLOR_DEFAULT+')', DRAWING_COLOR_DEFAULT);
+    if (!CSS.supports('color', newColor)) {newColor = DRAWING_COLOR_DEFAULT};
     drawingColor = newColor;
     colorButton.innerText = `Change drawing color: ${newColor}`;
     return newColor;
 }
 
 function changeOpacity () {
-    let newOpacityInc = prompt('Enter new opacity rate (must be number between 0 and 1, default is '+defaultOpacityInc+')', defaultOpacityInc);
-    if (!CSS.supports('opacity', newOpacityInc)) {newOpacityInc = defaultOpacityInc};
+    let newOpacityInc = prompt('Enter new opacity rate (must be number between 0 and 1, default is '+OPACITY_INC_DEFAULT+')', OPACITY_INC_DEFAULT);
+    if (!CSS.supports('opacity', newOpacityInc)) {newOpacityInc = OPACITY_INC_DEFAULT};
     opacityInc = Number(newOpacityInc);
     opacityButton.innerText = `Change opacity rate: ${newOpacityInc}`;
     return newOpacityInc;
@@ -147,21 +164,25 @@ function toggleEraser () {
 }
 
 function resetValues () {
-    numSquares = defaultNumSquares;
-    windowSize = defaultWindowSize;
-    windowColor = defaultWindowColor;
-    random = defaultRandom;
-    drawingColor = defaultDrawingColor;
-    opacityInc = defaultOpacityInc;
-    eraser = defaultEraser;
+    numSquares = NUM_SQUARES_DEFAULT;
+    windowSize = WINDOW_SIZE_DEFAULT;
+    windowColor = WINDOW_COLOR_DEFAULT;
+    random = RANDOM_DEFAULT;
+    drawingColor = DRAWING_COLOR_DEFAULT;
+    opacityInc = OPACITY_INC_DEFAULT;
+    eraser = ERASER_DEFAULT;
+    updateButtonsText();
+    buildDrawingWindow(windowSize, numSquares);
+}
+
+function updateButtonsText () {
     numSquaresButton.innerText = `Change the number of squares for the drawing area: ${numSquares}`;
     windowSizeButton.innerText = `Change the size of the drawing area: ${windowSize}px`;
     windowColorButton.innerText = `Change windows background color: ${windowColor}`;
     randomButton.innerText = `Random: ${random}`;
-    colorButton.innerText = `Change drawing color: ${defaultDrawingColor}`;
-    opacityButton.innerText = `Change opacity rate: ${defaultOpacityInc}`;
-    eraserButton.innerText = `Eraser: ${defaultEraser}`;
-    buildDrawingWindow(windowSize, numSquares);
+    colorButton.innerText = `Change drawing color: ${windowColor}`;
+    opacityButton.innerText = `Change opacity rate: ${opacityInc}`;
+    eraserButton.innerText = `Eraser: ${eraser}`;
 }
 
 
@@ -222,4 +243,17 @@ startoverButton.addEventListener('click', function () {buildDrawingWindow(window
 const resetButton = document.querySelector('#reset');
 
 resetButton.addEventListener('click', function () {resetValues()});
+
+
+const buttons = [
+    numSquaresButton,
+    windowSizeButton,
+    windowColorButton,
+    randomButton,
+    colorButton,
+    opacityButton,
+    eraserButton,
+    startoverButton,
+    resetButton
+    ];
 
